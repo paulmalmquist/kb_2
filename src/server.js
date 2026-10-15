@@ -10,19 +10,42 @@ import { discover } from './connectors.js';
 import { rpc } from './mcp.js';
 
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
+// An unrecognized mode must never silently mean "demo" (header impersonation).
+export function parseMode(value){
+  if(value===undefined||value==='')return 'demo';
+  if(!['demo','authenticated'].includes(value))throw new Error(`CONTEXT_MODE must be "demo" or "authenticated", not "${value}"`);
+  return value;
+}
+// The identity file is the directory of record for a pilot: applied on every start so transfers, manager changes and departures take effect.
+function applyIdentity(store,identityFile){
+  const identity=JSON.parse(readFileSync(identityFile,'utf8'));
+  demand(Array.isArray(identity.users)&&Array.isArray(identity.units)&&identity.units.some(x=>x.kind==='organization'),500,'Invalid identity configuration');
+  const ids=new Set(identity.units.map(x=>x.id)),users=new Set(identity.users.map(x=>x.id));
+  demand(ids.size===identity.units.length&&users.size===identity.users.length&&identity.users.every(x=>ids.has(x.unitId))&&identity.units.every(x=>users.has(x.managerId)&&(!x.parentId||ids.has(x.parentId))),500,'Identity references must be unique and resolvable');
+  demand(identity.units.every(x=>['team','department','organization'].includes(x.kind)),500,'Unit kind must be team, department, or organization');
+  // A person ID equal to a unit ID would make that unit's shared items look personal.
+  demand(![...users].some(x=>ids.has(x)),500,'User IDs and unit IDs must be distinct');
+  for(const unit of identity.units){const visited=new Set();let cursor=unit;while(cursor){demand(!visited.has(cursor.id),500,'Org hierarchy must not contain cycles');visited.add(cursor.id);cursor=identity.units.find(x=>x.id===cursor.parentId);}}
+  store.tx(()=>{
+    const removed=store.all('users').filter(u=>!users.has(u.id)&&u.active!==false),moved=identity.users.filter(x=>{const old=store.get('users',x.id);return old&&old.unitId!==x.unitId;});
+    identity.units.forEach(x=>store.put('units',x));identity.users.forEach(x=>store.put('users',{...x,active:true}));
+    removed.forEach(u=>store.put('users',{...u,active:false}));
+    catalog.forEach(c=>{if(!store.get('connectors',c.id))store.put('connectors',{id:c.id,baseUrl:'',status:'not_configured'});});
+    store.append('events',{id:`ev-identity-${Date.now()}-${Math.random().toString(36).slice(2)}`,at:new Date().toISOString(),actorId:'system',type:'identity.synchronized',scopeId:identity.units.find(x=>x.kind==='organization').id,detail:`Identity file applied: ${identity.users.length} people, ${identity.units.length} units, ${moved.length} moved, ${removed.length} deactivated.`});
+  });
+}
 export function createApplication({dbPath=join(root,'data','context.sqlite'),demo=true,tokenHashes={},identityFile=null,origin=null}={}){
   if(origin)origin=new URL(origin).origin;
-  const store=new Store(dbPath);
+  const store=new Store(dbPath),mode=demo?'demo':'authenticated',pinned=store.get('meta','mode')?.value;
+  // A database belongs to one mode. Demo identities must never be able to impersonate people in an authenticated database.
+  demand(!pinned||pinned===mode,500,`This database was initialized in ${pinned} mode and cannot be opened in ${mode} mode`);
+  demand(pinned||!demo||!store.all('users').length||store.get('events','seed'),500,'This database was not created by the demo seed and cannot be opened in demo mode');
   if(demo)seed(store);
-  else if(!store.all('users').length){
-    demand(identityFile,500,'Authenticated mode requires CONTEXT_IDENTITY_FILE to initialize identities');
-    const identity=JSON.parse(readFileSync(identityFile,'utf8'));
-    demand(Array.isArray(identity.users)&&Array.isArray(identity.units)&&identity.units.some(x=>x.kind==='organization'),500,'Invalid identity configuration');
-    const ids=new Set(identity.units.map(x=>x.id)),users=new Set(identity.users.map(x=>x.id));
-    demand(ids.size===identity.units.length&&users.size===identity.users.length&&identity.users.every(x=>ids.has(x.unitId))&&identity.units.every(x=>users.has(x.managerId)&&(!x.parentId||ids.has(x.parentId))),500,'Identity references must be unique and resolvable');
-    for(const unit of identity.units){const visited=new Set();let cursor=unit;while(cursor){demand(!visited.has(cursor.id),500,'Org hierarchy must not contain cycles');visited.add(cursor.id);cursor=identity.units.find(x=>x.id===cursor.parentId);}}
-    store.tx(()=>{identity.units.forEach(x=>store.put('units',x));identity.users.forEach(x=>store.put('users',x));catalog.forEach(c=>store.put('connectors',{id:c.id,baseUrl:'',status:'not_configured'}));});
+  else{
+    if(identityFile)applyIdentity(store,identityFile);
+    demand(store.all('users').length,500,'Authenticated mode requires CONTEXT_IDENTITY_FILE to initialize identities');
   }
+  if(!pinned)store.put('meta',{id:'mode',value:mode});
   const engine=new Engine(store,{demo});
   const authenticate=req=>{
     if(demo){const user=String(req.headers['x-demo-user']||'paul');engine.user(user);return user;}
@@ -51,9 +74,9 @@ export function createApplication({dbPath=join(root,'data','context.sqlite'),dem
           const input=await body(req);const result=rpc(engine,userId,input);return send(res,result===null?202:200,result);
         }
         if(method==='GET'&&path==='/api/bootstrap')return send(res,200,engine.bootstrap(userId));
-        if(method==='GET'&&path==='/api/events')return send(res,200,engine.bootstrap(userId).events);
-        if(method==='GET'&&path==='/api/bifrost-config')return send(res,200,{mcp:{client_configs:[{name:'dreamcatcher_context',connection_type:'http',connection_string:`${demo?expected:origin}/mcp`,auth_type:demo?'headers':'per_user_headers',...(demo?{headers:{'X-Demo-User':userId}}:{per_user_header_keys:['Authorization']}),tools_to_execute:['resolve_context','search_knowledge','list_apps','get_knowledge']}]}});
-        if(method==='GET'&&path.startsWith('/api/knowledge/'))return send(res,200,engine.asset(userId,decodeURIComponent(path.split('/').at(-1))));
+        if(method==='GET'&&path==='/api/events')return send(res,200,engine.visibleEvents(userId));
+        if(method==='GET'&&path==='/api/bifrost-config')return send(res,200,{mcp:{client_configs:[{name:'dreamcatcher_context',connection_type:'http',connection_string:`${demo?expected:origin}/mcp`,auth_type:demo?'headers':'per_user_headers',...(demo?{headers:{'X-Demo-User':userId}}:{per_user_header_keys:['authorization']}),tools_to_execute:['resolve_context','search_knowledge','list_apps','get_knowledge']}]}});
+        if(method==='GET'&&path.startsWith('/api/knowledge/'))return send(res,200,engine.inspect(userId,decodeURIComponent(path.split('/').at(-1))));
         demand(['POST','PUT','DELETE'].includes(method),404,'Endpoint not found');
         const input=await body(req);demand(input&&typeof input==='object'&&!Array.isArray(input),400,'Request body must be a JSON object');let out;const segments=path.split('/').filter(Boolean);
         if(method==='POST'&&path==='/api/knowledge')out=engine.create(userId,input);
@@ -82,7 +105,7 @@ export function createApplication({dbPath=join(root,'data','context.sqlite'),dem
 }
 
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
-  const demo=process.env.CONTEXT_MODE!=='authenticated';
+  const demo=parseMode(process.env.CONTEXT_MODE)==='demo';
   const host=process.env.HOST||'127.0.0.1',port=Number(process.env.PORT||8788);
   if(demo&&!['127.0.0.1','localhost','::1'].includes(host))throw new Error('Demo must bind to loopback. Use authenticated mode for shared deployments.');
   const hashes=JSON.parse(process.env.CONTEXT_TOKEN_HASHES||'{}');

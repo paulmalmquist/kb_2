@@ -1,0 +1,44 @@
+{
+  "checks": [
+    {
+      "name": "Authenticated mode shows the token login, not the workspace",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Wrong token is refused with a visible message",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Valid token opens Kim’s workspace",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "No demo identity switcher in authenticated mode",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Demo header without a bearer token is rejected (401)",
+      "ok": true,
+      "detail": "401"
+    },
+    {
+      "name": "Body/header identity spoofing ignored; principal comes from the token",
+      "ok": true,
+      "detail": "kim"
+    },
+    {
+      "name": "Reload clears the in-memory token (login shown again)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Cross-origin request with a valid token is rejected",
+      "ok": true,
+      "detail": "403"
+    }
+  ]
+}

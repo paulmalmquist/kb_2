@@ -1,6 +1,6 @@
 # Work-computer handoff prompt
 
-You are taking over Dreamcatcher Context for Relativity Space. Read README.md, ARCHITECTURE.md, INTEGRATION.md, and VERIFICATION.md before changing code. Run npm test and npm run check. Start locally with Node 24+ and exercise the synthetic review workflow.
+You are taking over Dreamcatcher Context for Relativity Space. Read README.md, ARCHITECTURE.md, INTEGRATION.md, VERIFICATION.md and REVIEW.md before changing code. REVIEW.md lists the business-policy decisions that are still open; do not treat the implementation defaults it labels **[POLICY]** as approved company rules. Run npm test and npm run check. Start locally with Node 24+ and exercise the synthetic review workflow.
 
 Preserve the user's decisions:
 
@@ -20,7 +20,7 @@ First inspect the actual approved Dreamcatcher, Bifrost, identity, and source en
 Implement company integration in this order:
 
 1. Map actual employee identity, the defined hierarchy, managers and delegates. Replace sample identities. Use the approved SSO identity and revocation mechanism.
-2. Confirm which Bifrost product/version is deployed, how it forwards per-user identity, and which client hooks can require context retrieval before responses. Test with two users that cannot see each other's private knowledge.
+2. Confirm which Bifrost product/version is deployed, how it forwards per-user identity, and which client hooks can require context retrieval before responses. With Bifrost v2.3.0 the verified pattern is: a lowercase `authorization` per-user header key, admin verification, one Bifrost identity per person, and each person submitting their own context token. Never share a virtual key. Test with two users that cannot see each other's private knowledge (`docs/review/scripts/mcp-harness.sh` is the direct-MCP version).
 3. Map Confluence page restrictions and QMS approval, current/effective/superseded revisions, and approved deviations. Decide how those become explicit authority and applicability fields. General Confluence pages must not inherit QMS authority automatically.
 4. Connect bounded Jira/GitLab/Confluence discovery under the caller's identity. Define team-to-Jira mappings. Add full ingestion only after ACL propagation, deletion handling, freshness, and source ownership are explicit.
 5. Inspect the approved Manufacturo and NX/PLM access routes, then add concrete adapters with lineage and part/work-order/revision keys. Keep export imports clearly labeled snapshots.
