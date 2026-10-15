@@ -1,0 +1,12 @@
+{
+  "mcp": {
+    "client_configs": [{
+      "name": "dreamcatcher_context",
+      "connection_type": "http",
+      "connection_string": "https://YOUR_CONTEXT_HOST/mcp",
+      "auth_type": "per_user_headers",
+      "per_user_header_keys": ["Authorization"],
+      "tools_to_execute": ["resolve_context", "search_knowledge", "get_knowledge", "list_apps"]
+    }]
+  }
+}

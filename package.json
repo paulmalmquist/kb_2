@@ -1,0 +1,14 @@
+{
+  "name": "dreamcatcher-context",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Scoped knowledge, promotion review, and context delivery for Dreamcatcher",
+  "engines": { "node": ">=24.0.0" },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/*.test.js",
+    "check": "node --check src/server.js && node --check src/engine.js && node --check public/app.js",
+    "demo:reset": "node scripts/reset-demo.js"
+  }
+}

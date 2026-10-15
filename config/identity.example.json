@@ -1,0 +1,13 @@
+{
+  "units": [
+    {"id":"org","name":"Your organization","kind":"organization","parentId":null,"managerId":"org_owner"},
+    {"id":"department","name":"Your department","kind":"department","parentId":"org","managerId":"department_manager"},
+    {"id":"team","name":"Your team","kind":"team","parentId":"department","managerId":"team_manager"}
+  ],
+  "users": [
+    {"id":"org_owner","name":"Organization Owner","title":"Standards owner","unitId":"org"},
+    {"id":"department_manager","name":"Department Manager","title":"Department manager","unitId":"department"},
+    {"id":"team_manager","name":"Team Manager","title":"Team manager","unitId":"team"},
+    {"id":"individual","name":"Individual User","title":"Team member","unitId":"team"}
+  ]
+}
