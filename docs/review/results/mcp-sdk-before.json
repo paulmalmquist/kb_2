@@ -1,0 +1,47 @@
+[
+  {
+    "name": "SDK initialize negotiates a protocol version the server supports",
+    "ok": true,
+    "detail": "2025-11-25"
+  },
+  {
+    "name": "tools/list exposes four read-only tools and no promotion tools",
+    "ok": true,
+    "detail": "resolve_context,search_knowledge,list_apps,get_knowledge"
+  },
+  {
+    "name": "Kim reads her own private item, labeled personal",
+    "ok": false,
+    "detail": ""
+  },
+  {
+    "name": "Kim cannot read Lee's private item",
+    "ok": true,
+    "detail": "Knowledge item unavailable"
+  },
+  {
+    "name": "Kim's search never returns Lee's private item",
+    "ok": true,
+    "detail": "1 results"
+  },
+  {
+    "name": "resolve_context principal is Kim and excludes Lee",
+    "ok": true,
+    "detail": "ready"
+  },
+  {
+    "name": "A model-supplied userId argument is rejected",
+    "ok": true,
+    "detail": "MCPError: Invalid tool arguments"
+  },
+  {
+    "name": "Same prompt as Lee returns Lee\u2019s context, not Kim\u2019s",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "No credential: the SDK cannot open a session (raw HTTP status is checked separately)",
+    "ok": true,
+    "detail": "ExceptionGroup('unhandled errors in a TaskGroup', [ExceptionGroup('unhandled errors in a TaskGroup', [MCPError(-32603, '"
+  }
+]

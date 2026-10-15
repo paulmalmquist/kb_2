@@ -5,7 +5,7 @@
       "connection_type": "http",
       "connection_string": "https://YOUR_CONTEXT_HOST/mcp",
       "auth_type": "per_user_headers",
-      "per_user_header_keys": ["Authorization"],
+      "per_user_header_keys": ["authorization"],
       "tools_to_execute": ["resolve_context", "search_knowledge", "get_knowledge", "list_apps"]
     }]
   }

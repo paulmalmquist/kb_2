@@ -1,0 +1,232 @@
+{
+  "checks": [
+    {
+      "name": "Overview renders for Paul (demo)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Personal Jira plan shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Team ticket request shows clarification and a blocked plan, not a widened query",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Named-person request is not answered with the caller’s tickets",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Reconciliation request shows the team standard as required",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Exclusion trace summarizes unrelated items",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Create private knowledge",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Edit creates a new version",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Promotion requires the consent checkbox (browser validation)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Submit promotion",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Reviewer diff shows submitted text as new and hides the private original line",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Approve without a rationale is refused with a visible error",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Request changes recorded",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Double-click approve records exactly one decision",
+      "ok": true,
+      "detail": "[[\"changes_requested\",1],[\"approved\",1]]"
+    },
+    {
+      "name": "Paul sees the certified #DATA version and keeps the private original",
+      "ok": true,
+      "detail": "[\"QA ledger tie-out PRIVATE: personal reminder. auditledger Only you personal reference private v2\",\"QA ledger tie-out Tie out ledger totals by period. auditledger #DATA team reference certified v1\"]"
+    },
+    {
+      "name": "Recertification diff exposes the 90→9 day change since last certification",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "App context is refused while its dependency changed (app endorsement suspended)",
+      "ok": true,
+      "detail": "This app endorsement requires review before use"
+    },
+    {
+      "name": "Delegate approves the recertification",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Team manager re-endorses the app after its dependency was recertified",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Stale proposal shows the reason and a disabled approve button",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Escape closes the dialog",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Normalized import lands privately",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Detail shows source provenance",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Tether proposed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Destination manager accepts tether",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Tether revoked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Delegate appointed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Delegate revoked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "App context resolves with the app’s required standard after recertification",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Enter opens a focused registry row",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Reload keeps identity (session) and persisted decisions",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Activity and Bifrost screens render",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mobile overview: no horizontal page overflow",
+      "ok": true,
+      "detail": "overflow=0px"
+    },
+    {
+      "name": "Mobile knowledge: no horizontal page overflow",
+      "ok": true,
+      "detail": "overflow=0px"
+    },
+    {
+      "name": "Mobile reviews: no horizontal page overflow",
+      "ok": true,
+      "detail": "overflow=0px"
+    },
+    {
+      "name": "Mobile context: no horizontal page overflow",
+      "ok": true,
+      "detail": "overflow=0px"
+    },
+    {
+      "name": "Mobile org: no horizontal page overflow",
+      "ok": true,
+      "detail": "overflow=0px"
+    },
+    {
+      "name": "Mobile sources: no horizontal page overflow",
+      "ok": true,
+      "detail": "overflow=0px"
+    },
+    {
+      "name": "Mobile apps: no horizontal page overflow",
+      "ok": true,
+      "detail": "overflow=0px"
+    },
+    {
+      "name": "Mobile activity: no horizontal page overflow",
+      "ok": true,
+      "detail": "overflow=0px"
+    },
+    {
+      "name": "Mobile bridge: no horizontal page overflow",
+      "ok": true,
+      "detail": "overflow=0px"
+    },
+    {
+      "name": "Mobile review dialog fits the viewport width",
+      "ok": true,
+      "detail": "{\"x\":20,\"y\":42.203125,\"width\":350,\"height\":759.59375}"
+    },
+    {
+      "name": "No JavaScript errors in the browser console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Only expected HTTP errors (approve without rationale → 400; blocked app → 409)",
+      "ok": true,
+      "detail": "400 POST /api/promotions/proposal-5f1c3ba5-2556-4f19-8399-f24c3c58ec89/review | 409 POST /api/context/resolve"
+    }
+  ],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+    "Failed to load resource: the server responded with a status of 409 (Conflict)"
+  ],
+  "httpErrors": [
+    "400 POST /api/promotions/proposal-5f1c3ba5-2556-4f19-8399-f24c3c58ec89/review",
+    "409 POST /api/context/resolve"
+  ]
+}

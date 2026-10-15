@@ -2,9 +2,9 @@ import { Problem } from './engine.js';
 
 const tools=[
   {name:'resolve_context',description:'Resolve authorized personal, team, department and organization context for a request. Call before answering work questions. Unqualified latest Jira tickets means the caller’s own issues. Returns evidence, mandatory constraints, conflicts and a scoped tool plan; does not execute upstream Jira queries.',inputSchema:{type:'object',properties:{prompt:{type:'string'},scope:{type:'string',enum:['auto','personal','team','department','organization']},appId:{type:'string'},budget:{type:'integer',minimum:500,maximum:16000}},required:['prompt'],additionalProperties:false}},
-  {name:'search_knowledge',description:'Search knowledge the authenticated caller is allowed to access. Does not expose private items owned by other people.',inputSchema:{type:'object',properties:{query:{type:'string'}},required:['query'],additionalProperties:false}},
+  {name:'search_knowledge',description:'Search knowledge the authenticated caller is allowed to access. Does not expose private items owned by other people. Each result has governance.usable and governance.binding; never treat an unusable or non-binding item as an approved requirement.',inputSchema:{type:'object',properties:{query:{type:'string'}},required:['query'],additionalProperties:false}},
   {name:'list_apps',description:'List Dreamcatcher apps available to the authenticated caller with audience and certification state.',inputSchema:{type:'object',properties:{},additionalProperties:false}},
-  {name:'get_knowledge',description:'Read a specific authorized knowledge item, including source revision and certification status.',inputSchema:{type:'object',properties:{id:{type:'string'}},required:['id'],additionalProperties:false}},
+  {name:'get_knowledge',description:'Read a specific authorized knowledge item, including source revision, effective certification status, and governance (usable/binding) for the caller.',inputSchema:{type:'object',properties:{id:{type:'string'}},required:['id'],additionalProperties:false}},
 ];
 
 export function rpc(engine,userId,message){
@@ -24,9 +24,11 @@ export function rpc(engine,userId,message){
     try{
       let output;
       if(name==='resolve_context')output=engine.resolve(userId,a);
-      if(name==='get_knowledge')output=engine.asset(userId,a.id);
-      if(name==='list_apps')output=engine.listAssets(userId).filter(x=>x.kind==='app');
-      if(name==='search_knowledge')output=engine.listAssets(userId).filter(x=>`${x.title} ${x.content} ${x.tags.join(' ')}`.toLowerCase().includes(a.query.toLowerCase())).slice(0,30);
+      // Every item carries what it means for this caller: usable or stale, binding or tethered guidance.
+      const labeled=x=>({...x,governance:engine.governance(userId,x)});
+      if(name==='get_knowledge')output=engine.inspect(userId,a.id);
+      if(name==='list_apps')output=engine.listAssets(userId).filter(x=>x.kind==='app').map(labeled);
+      if(name==='search_knowledge')output=engine.listAssets(userId).filter(x=>`${x.title} ${x.content} ${x.tags.join(' ')}`.toLowerCase().includes(a.query.toLowerCase())).map(labeled).sort((x,y)=>Number(y.governance.usable)-Number(x.governance.usable)).slice(0,30);
       result={content:[{type:'text',text:JSON.stringify(output)}],isError:false};
     }catch(error){result={content:[{type:'text',text:error instanceof Problem?error.message:'Tool failed'}],isError:true};}
   }else return failure(-32601,'Method not found');
